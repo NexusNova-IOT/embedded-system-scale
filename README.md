@@ -1,5 +1,5 @@
 # Embedded Weight Control System
-<h1 align="center"> <img src="https://raw.githubusercontent.com/NexusNova-IOT/embedded-system-temperature/main/assets/screenshot.png" alt="Project Screenshot" height="350"> </h1>
+<h1 align="center"> <img src="https://raw.githubusercontent.com/NexusNova-IOT/embedded-system-scale/main/assets/screenshot.png" alt="Project Screenshot" height="350"> </h1>
 
 ## Project Description
 
