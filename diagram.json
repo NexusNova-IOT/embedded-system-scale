@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "author": "NexusNova",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": -81.7, "left": -206.6, "attrs": {} },
+    {
+      "type": "wokwi-hx711",
+      "id": "cell1",
+      "top": -26.2,
+      "left": -35.8,
+      "attrs": { "type": "50kg" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "esp:3V3", "cell1:VCC", "green", [ "v0" ] ],
+    [ "cell1:SCK", "esp:D4", "red", [ "h0" ] ],
+    [ "cell1:DT", "esp:D18", "yellow", [ "h0" ] ],
+    [ "cell1:GND", "esp:GND.1", "black", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}
