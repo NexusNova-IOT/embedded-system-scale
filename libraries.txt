@@ -2,3 +2,5 @@
 # See https://docs.wokwi.com/guides/libraries
 
 HX711
+WiFi
+LiquidCrystal I2C
