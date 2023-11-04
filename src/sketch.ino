@@ -1,6 +1,5 @@
-#include "HX711.h"
 #include <WiFi.h>
-
+#include "HX711.h"
 const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
