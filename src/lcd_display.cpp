@@ -16,6 +16,4 @@ void setupDisplay() {
 void showInDisplay(const char *message) {
   LCD.clear();
   LCD.print(message);
-    //LCD.print(weight, 1);
-    //LCD.print(" kg");
 }

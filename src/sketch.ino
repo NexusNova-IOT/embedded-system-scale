@@ -14,8 +14,18 @@ void setup() {
 
 void loop() {
   float weight = sense();
-  String requestBody = String("{\"weight\":") + String(weight) + String("}");
-  Serial.println(requestBody);
-  showInDisplay((String(weight) + String(" kg")).c_str());
+
+  if (!isnan(weight)) {
+    String requestBody = String("{\"weight\":") + String(weight) + String("}");
+    Serial.println(requestBody);
+    showInDisplay((String(weight) + String(" kg")).c_str());
+
+    int httpResponseCode = sendPUTRequest(requestBody.c_str());
+    checkResponseCode(httpResponseCode);
+
+  } else {
+    Serial.println("Error reading sensor weight");
+  }
+
   delay(DELAY);
 }
