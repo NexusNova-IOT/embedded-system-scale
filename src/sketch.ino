@@ -5,9 +5,11 @@
 #include "lcd_display.h"
 #define DELAY 1000
 
+String authToken;
 void setup() {
   Serial.begin(115200);
   setupWiFi();
+  authToken = authAndGetToken();
   setupWeightSensor();
   setupDisplay();
 }
@@ -20,7 +22,7 @@ void loop() {
     Serial.println(requestBody);
     showInDisplay((String(weight) + String(" kg")).c_str());
 
-    int httpResponseCode = sendPUTRequest(requestBody.c_str());
+    int httpResponseCode = sendPUTRequest(requestBody.c_str(), authToken.c_str());
     checkResponseCode(httpResponseCode);
 
   } else {
