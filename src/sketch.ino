@@ -3,7 +3,7 @@
 #include "http_utils.h"
 #include "weight_sensor.h"
 #include "lcd_display.h"
-#define DELAY 1000
+#define DELAY 1500
 #define BTN_PIN 33
 
 String authToken;
@@ -11,13 +11,13 @@ String authToken;
 void sendWeightData(String requestBody)
 {
   Serial.println("Button pressed");
-  showInDisplay("Waiting server...", 3, 2, false);
+  showInDisplay("Waiting server...", 2, 3, false);
   int httpResponseCode = sendPUTRequest(requestBody.c_str(), authToken.c_str());
   checkResponseCode(httpResponseCode);
   if (httpResponseCode == 200)
-    showInDisplay("Data sent", 11, 3, false);
+    showInDisplay("Data sent", 3, 11, false);
   else
-    showInDisplay("Error sending data", 2, 3, false);
+    showInDisplay("Error sending data", 3, 2, false);
   delay(DELAY);
 }
 
@@ -29,6 +29,7 @@ void setup() {
   //= authAndGetToken();
   setupWeightSensor();
   setupDisplay();
+  delay(DELAY);
 }
 
 void loop() {

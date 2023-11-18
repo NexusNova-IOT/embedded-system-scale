@@ -11,9 +11,10 @@ void setupDisplay() {
     LCD.init();
     LCD.backlight();
     LCD.setCursor(0, 0);
+    LCD.print("Push 2 scnds to send");
 }
 
-void showInDisplay(const char *message, int column, int row, bool clean) {
+void showInDisplay(const char *message, int row, int column, bool clean) {
   if (clean) LCD.clear();
   LCD.setCursor(column, row);
   LCD.print(message);
