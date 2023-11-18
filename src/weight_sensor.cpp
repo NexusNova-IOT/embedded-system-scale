@@ -10,5 +10,9 @@ void setupWeightSensor() {
 }
 
 float sense() {
-    return scale.get_units();
+    float weight = scale.get_units();
+    if (isnan(weight)) {
+      Serial.println("Failed to read from HX711 sensor!");
+    }
+    return weight;
 }

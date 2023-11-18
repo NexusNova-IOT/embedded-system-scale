@@ -13,7 +13,8 @@ void setupDisplay() {
     LCD.setCursor(0, 0);
 }
 
-void showInDisplay(const char *message) {
-  LCD.clear();
+void showInDisplay(const char *message, int column, int row, bool clean) {
+  if (clean) LCD.clear();
+  LCD.setCursor(column, row);
   LCD.print(message);
 }
