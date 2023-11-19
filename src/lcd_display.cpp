@@ -19,3 +19,8 @@ void showInDisplay(const char *message, int row, int column, bool clean) {
   LCD.setCursor(column, row);
   LCD.print(message);
 }
+
+void displayWeightInfo(const char* label, float value, int row, int column, bool clean) {
+  if (clean) showInDisplay("", row, column, true);
+  showInDisplay(((String(label)) + (String(": ")) + (String(value) + String(" kg"))).c_str(), row, column, false);
+}

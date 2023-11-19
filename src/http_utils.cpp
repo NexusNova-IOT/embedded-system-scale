@@ -4,6 +4,7 @@
 
 const char* authServerAddress = "https://lifetravel-iot-api.azurewebsites.net/iot/logger/token";
 const char* serverAddress= "https://lifetravel-iot-api.azurewebsites.net/api/v1/weight-balances/update-weight/";
+const char* serverTest= "http://192.168.18.37:3000/weights/";
 
 const char* authAndGetToken(const char* email, const char* password) {
   Serial.println("Inicio de la función authAndGetToken");
@@ -20,8 +21,8 @@ const char* authAndGetToken(const char* email, const char* password) {
     String response = http.getString();
 
     // Just for debugging purposes
-    //Serial.println("Server Response:");
-    //Serial.println(response);
+    Serial.println("Server Response:");
+    Serial.println(response);
 
     const size_t capacity = JSON_OBJECT_SIZE(10) + 1024;
     DynamicJsonDocument doc(capacity);
@@ -59,4 +60,37 @@ void checkResponseCode(int httpResponseCode) {
     Serial.print("Request error. HTTP response code:");
     Serial.println(httpResponseCode);
     }
+}
+
+std::pair<float, float> getWeightFromServer(const char* authToken, int resourceId) {
+  HTTPClient http;
+  http.begin(serverTest + String(resourceId));
+  http.addHeader("Content-Type", "application/json");
+  String authHeader = "Bearer " + String(authToken);
+  http.addHeader("Authorization", authHeader);
+
+  int httpResponseCode = http.GET();
+
+  if (httpResponseCode == 200) {
+    String response = http.getString();
+    Serial.println("Server Response:");
+    Serial.println(response);
+
+    const size_t capacity = JSON_OBJECT_SIZE(3) + 30;
+    DynamicJsonDocument doc(capacity);
+    deserializeJson(doc, response);
+
+    int id = doc["id"];
+    float maxWeight = doc["maxWeight"];
+    float actualWeight = doc["actualWeight"];
+
+    http.end();
+    Serial.println("Successful request");
+    return std::make_pair(actualWeight, maxWeight);
+  } else {
+    Serial.print("Error on HTTP request. Response code: ");
+    Serial.println(httpResponseCode);
+    http.end();
+    return std::make_pair(-1, -1);
+  }
 }
