@@ -1,4 +1,4 @@
-#include "weight_sensor.h"
+#include "weight_sensor.hpp"
 #include <HX711.h>
 
 HX711 scale;

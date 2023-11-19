@@ -1,4 +1,4 @@
-#include "wifi_utils.h"
+#include "wifi_utils.hpp"
 #include <WiFi.h>
 
 const char* ssid = "Wokwi-GUEST";

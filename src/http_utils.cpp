@@ -1,8 +1,8 @@
-#include "http_utils.h"
+#include "http_utils.hpp"
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* authServerAddress = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAYCuRtIMwuPYgezV8R5-QD373Tx4nhJAg";
+const char* authServerAddress = "https://lifetravel-iot-api.azurewebsites.net/iot/logger/token";
 const char* serverAddress= "https://lifetravel-iot-api.azurewebsites.net/api/v1/weight-balances/update-weight/";
 
 const char* authAndGetToken(const char* email, const char* password) {
@@ -12,32 +12,32 @@ const char* authAndGetToken(const char* email, const char* password) {
   http.begin(authServerAddress);
   http.addHeader("Content-Type", "application/json");
 
-  String requestBody = "{\"email\":\"" + String(email) + "\",\"password\":\"" + String(password) + "\",\"returnSecureToken\":true}";
+  String requestBody = "{\"email\":\"" + String(email) + "\",\"password\":\"" + String(password) + "\"}";
 
   int httpResponseCode = http.POST(requestBody);
 
   if (httpResponseCode == 200) {
     String response = http.getString();
-    Serial.println("Respuesta del servidor:");
-    Serial.println(response);
 
-    const size_t capacity = JSON_OBJECT_SIZE(5) + 300;
+    // Just for debugging purposes
+    //Serial.println("Server Response:");
+    //Serial.println(response);
+
+    const size_t capacity = JSON_OBJECT_SIZE(10) + 1024;
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, response);
-
-    const char* jwtToken = doc["idToken"];
+    const char *jwtToken = doc["idToken"];
     http.end();
-    Serial.println("Fin de la función authAndGetToken");
+    Serial.println("Successful authentication");
     return jwtToken;
   } else {
-    Serial.print("Error de autenticación. Código de respuesta HTTP:");
+    Serial.print("Authentication Error. HTTP response code:");
     Serial.println(httpResponseCode);
     http.end();
-    Serial.println("Fin de la función authAndGetToken con error");
+    Serial.println("An error occurred during authentication");
     return nullptr;
   }
 }
-
 
 int sendPUTRequest(const char* requestBody, const char* authToken, int resourceId) {
   HTTPClient http;
