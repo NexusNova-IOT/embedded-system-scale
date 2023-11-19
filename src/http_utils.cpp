@@ -94,3 +94,25 @@ std::pair<float, float> getWeightFromServer(const char* authToken, int resourceI
     return std::make_pair(-1, -1);
   }
 }
+
+void updateTotalWeight(const char* authToken, float totalWeight, int resourceId) {
+  HTTPClient http;
+  http.begin(serverTest + String(resourceId));
+  http.addHeader("Content-Type", "application/json");
+  String authHeader = "Bearer " + String(authToken);
+  http.addHeader("Authorization", authHeader);
+
+  String requestBody = "{\"maxWeight\": 280.0, \"actualWeight\": " + String(totalWeight) + "}";
+  int httpResponseCode = http.PUT(requestBody);
+
+  if (httpResponseCode == 200) {
+    String response = http.getString();
+    Serial.println("Server Response:");
+    Serial.println(response);
+    Serial.println("Successful request");
+  } else {
+    Serial.print("Error on HTTP request. Response code: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end();
+}
