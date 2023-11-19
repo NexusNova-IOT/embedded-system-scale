@@ -23,9 +23,10 @@ void sendWeightData(String requestBody) {
 }
 
 void showBanner() {
-  showInDisplay("Press RED to reset  ", 0, 0, true);
-  showInDisplay("Press BLUE to weigh", 1, 0, false);
-  showInDisplay("& send to server  ", 2, 0, false);
+  showInDisplay("Long press");
+  showInDisplay("RED to reset", 1, 0, false);
+  showInDisplay("Press BLUE to weigh", 2, 0, false);
+  showInDisplay("& send to server  ", 3, 0, false);
 }
 
 void setup() {
@@ -33,11 +34,57 @@ void setup() {
   pinMode(BTN_SEND_PIN, INPUT_PULLUP);
   pinMode(BTN_RESET_PIN, INPUT_PULLUP);
   setupWiFi();
-  authToken = "uwu";//= authAndGetToken();
+  authToken = authAndGetToken();
   setupWeightSensor();
   setupDisplay();
   showBanner();
   delay(DELAY);
+}
+
+void displayWeightSummary(float actualWeight, float totalWeight, float maxWeight) {
+  showInDisplay("Weight summary", 0, 0, true);
+  displayWeightInfo("Actual", actualWeight, 1, 0, false);
+  displayWeightInfo("Total", totalWeight, 2, 0, false);
+  displayWeightInfo("Maximum", maxWeight, 3, 0, false);
+}
+
+void handleSendButton(float& actualWeight, const char* authToken, int deviceId) {
+  if (digitalRead(BTN_SEND_PIN) == LOW) {
+    std::pair<float, float> weightAndMax = getWeightFromServer(authToken, deviceId);
+    if (weightAndMax.first == -1) {
+      showInDisplay("Error getting data", 1);
+      delay(DELAY);
+      return;
+    }
+    float totalWeight = weightAndMax.first + actualWeight;
+    if (totalWeight > weightAndMax.second) {
+      showInDisplay("Weight limit reached");
+      showInDisplay("Data not sent", 1, 0, false);
+      displayWeightInfo("Actual", actualWeight, 2, 0, false);
+      displayWeightInfo("Exceeded", totalWeight - weightAndMax.second, 3, 0, false);
+      delay(DELAY);
+      return;
+    }
+    displayWeightSummary(actualWeight, totalWeight, weightAndMax.second);
+    updateTotalWeight(authToken, totalWeight, deviceId);
+  }
+}
+
+void handleResetButton(const char* authToken, int deviceId, float& actualWeight) {
+  if (digitalRead(BTN_RESET_PIN) == LOW) {
+    showInDisplay("Press RED again", 1);
+    showInDisplay("to reset", 2, 0, false);
+    delay(2000);
+    if (digitalRead(BTN_RESET_PIN) == LOW) {
+      actualWeight = 0.0;
+      updateTotalWeight(authToken, 0.0, deviceId);
+      showInDisplay("Total weight reset", 1);
+      delay(DELAY);
+    } else {
+      showInDisplay("Reset canceled", 1);
+      delay(DELAY);
+    }
+  }
 }
 
 void loop() {
@@ -46,30 +93,7 @@ void loop() {
     showInDisplay("Error reading weight", 1);
     return;
   }
-  if (digitalRead(BTN_SEND_PIN) == LOW) {
-    std::pair<float, float> weightAndMax = getWeightFromServer(authToken.c_str(), DEVICE_ID);
-    if (weightAndMax.first == -1) {
-      showInDisplay("Error getting data", 1);
-      delay(DELAY);
-      return;
-    }
-    if (weightAndMax.first + weight > weightAndMax.second) {
-      showInDisplay("Weight limit reached");
-      showInDisplay("Data not sent", 1, 0, false);
-      displayWeightInfo("Actual", weight, 2, 0, false);
-      displayWeightInfo("Exceeded", weightAndMax.first + weight - weightAndMax.second, 3, 0, false);
-      delay(DELAY);
-      return;
-    }
-    weightAndMax.first += weight;
-    showInDisplay(((String("Weight sumary"))).c_str());
-    displayWeightInfo("Actual", weight, 1, 0);
-    displayWeightInfo("Total", weightAndMax.first, 2, 0);
-    displayWeightInfo("Maximum", weightAndMax.second, 3, 0);
-    updateTotalWeight(authToken.c_str(), weightAndMax.first, DEVICE_ID);
-  }
-  if (digitalRead(BTN_RESET_PIN) == LOW) {
-    updateTotalWeight(authToken.c_str(), 0.0, DEVICE_ID);
-    showInDisplay("Total weight reseted", 1);
-  }
+
+  handleSendButton(weight, authToken.c_str(), DEVICE_ID);
+  handleResetButton(authToken.c_str(), DEVICE_ID, weight);
 }
