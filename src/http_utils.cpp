@@ -7,7 +7,7 @@ const char* serverAddress= "https://lifetravel-iot-api.azurewebsites.net/api/v1/
 const char* serverTest= "http://192.168.18.37:3000/weights/";
 
 const char* authAndGetToken(const char* email, const char* password) {
-  Serial.println("Inicio de la función authAndGetToken");
+  Serial.println("Waiting for the authentication response...");
   HTTPClient http;
   http.setTimeout(10000);
   http.begin(authServerAddress);
@@ -16,21 +16,22 @@ const char* authAndGetToken(const char* email, const char* password) {
   String requestBody = "{\"email\":\"" + String(email) + "\",\"password\":\"" + String(password) + "\"}";
 
   int httpResponseCode = http.POST(requestBody);
+  String token = "";
 
   if (httpResponseCode == 200) {
     String response = http.getString();
-
-    // Just for debugging purposes
+    /* just for debug
     Serial.println("Server Response:");
     Serial.println(response);
-
+    */
     const size_t capacity = JSON_OBJECT_SIZE(10) + 1024;
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, response);
-    const char *jwtToken = doc["idToken"];
+
+    token = doc["idToken"].as<String>();
     http.end();
     Serial.println("Successful authentication");
-    return jwtToken;
+    return token.c_str();
   } else {
     Serial.print("Authentication Error. HTTP response code:");
     Serial.println(httpResponseCode);
