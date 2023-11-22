@@ -1,11 +1,13 @@
+// HTTP utilities for authentication, data retrieval, and server communication
 #include "http_utils.hpp"
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
 const char* authServerAddress = "https://lifetravel-iot-api.azurewebsites.net/iot/logger/token";
-const char* serverAddress= "https://lifetravel-iot-api.azurewebsites.net/api/v1/weight-balances/update-weight/";
-const char* serverTest= "http://192.168.18.37:3000/weights/";
+const char* serverAddress = "https://lifetravel-iot-api.azurewebsites.net/api/v1/weight-balances/update-weight/";
+const char* serverTest = "http://192.168.18.37:3000/weights/";
 
+// Function to authenticate and obtain an authentication token
 const char* authAndGetToken(const char* email, const char* password) {
   Serial.println("Waiting for the authentication response...");
   HTTPClient http;
@@ -20,10 +22,8 @@ const char* authAndGetToken(const char* email, const char* password) {
 
   if (httpResponseCode == 200) {
     String response = http.getString();
-    /* just for debug
-    Serial.println("Server Response:");
-    Serial.println(response);
-    */
+
+    // Deserialize JSON response to extract the authentication token
     const size_t capacity = JSON_OBJECT_SIZE(10) + 1024;
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, response);
@@ -41,28 +41,31 @@ const char* authAndGetToken(const char* email, const char* password) {
   }
 }
 
+// Function to send a PUT request to update weight data on the server
 int sendPUTRequest(const char* requestBody, const char* authToken, int resourceId) {
   HTTPClient http;
   http.begin(serverAddress + String(resourceId));
   http.addHeader("Content-Type", "application/json");
   String authHeader = "Bearer " + String(authToken);
   http.addHeader("Authorization", authHeader);
-  
+
   int httpResponseCode = http.PUT(requestBody);
 
   http.end();
   return httpResponseCode;
 }
 
+// Function to check the HTTP response code and print appropriate messages
 void checkResponseCode(int httpResponseCode) {
   if (httpResponseCode == 200) {
     Serial.println("Successfully updated on the server.");
   } else {
     Serial.print("Request error. HTTP response code:");
     Serial.println(httpResponseCode);
-    }
+  }
 }
 
+// Function to retrieve weight data from the server
 std::pair<float, float> getWeightFromServer(const char* authToken, int resourceId) {
   HTTPClient http;
   http.begin(serverTest + String(resourceId));
@@ -74,9 +77,8 @@ std::pair<float, float> getWeightFromServer(const char* authToken, int resourceI
 
   if (httpResponseCode == 200) {
     String response = http.getString();
-    Serial.println("Server Response:");
-    Serial.println(response);
 
+    // Deserialize JSON response to extract weight information
     const size_t capacity = JSON_OBJECT_SIZE(3) + 30;
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, response);
@@ -96,6 +98,7 @@ std::pair<float, float> getWeightFromServer(const char* authToken, int resourceI
   }
 }
 
+// Function to update total weight data on the server
 void updateTotalWeight(const char* authToken, float totalWeight, int resourceId) {
   HTTPClient http;
   http.begin(serverTest + String(resourceId));
@@ -103,6 +106,7 @@ void updateTotalWeight(const char* authToken, float totalWeight, int resourceId)
   String authHeader = "Bearer " + String(authToken);
   http.addHeader("Authorization", authHeader);
 
+  // Prepare request body with total weight information
   String requestBody = "{\"maxWeight\": 280.0, \"actualWeight\": " + String(totalWeight) + "}";
   int httpResponseCode = http.PUT(requestBody);
 
@@ -115,5 +119,6 @@ void updateTotalWeight(const char* authToken, float totalWeight, int resourceId)
     Serial.print("Error on HTTP request. Response code: ");
     Serial.println(httpResponseCode);
   }
+
   http.end();
 }
