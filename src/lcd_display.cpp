@@ -13,7 +13,6 @@ void setupDisplay() {
     LCD.init();
     LCD.backlight();
     LCD.setCursor(0, 0);
-    LCD.print("Push 2 scnds to send");
 }
 
 // Function to display a message on the LCD

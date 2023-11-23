@@ -4,8 +4,8 @@
 #include <ArduinoJson.h>
 
 const char* authServerAddress = "https://lifetravel-iot-api.azurewebsites.net/iot/logger/token";
-const char* serverAddress = "https://lifetravel-iot-api.azurewebsites.net/api/v1/weight-balances/update-weight/";
-const char* serverTest = "http://192.168.18.37:3000/weights/";
+const char* serverUpdate = "https://lifetravel-iot-api.azurewebsites.net/api/v1/weight-balances/update-weight/";
+const char* serverGet = "https://lifetravel-iot-api.azurewebsites.net/api/v1/weight-balances/";
 
 // Function to authenticate and obtain an authentication token
 const char* authAndGetToken(const char* email, const char* password) {
@@ -41,20 +41,6 @@ const char* authAndGetToken(const char* email, const char* password) {
   }
 }
 
-// Function to send a PUT request to update weight data on the server
-int sendPUTRequest(const char* requestBody, const char* authToken, int resourceId) {
-  HTTPClient http;
-  http.begin(serverAddress + String(resourceId));
-  http.addHeader("Content-Type", "application/json");
-  String authHeader = "Bearer " + String(authToken);
-  http.addHeader("Authorization", authHeader);
-
-  int httpResponseCode = http.PUT(requestBody);
-
-  http.end();
-  return httpResponseCode;
-}
-
 // Function to check the HTTP response code and print appropriate messages
 void checkResponseCode(int httpResponseCode) {
   if (httpResponseCode == 200) {
@@ -68,7 +54,7 @@ void checkResponseCode(int httpResponseCode) {
 // Function to retrieve weight data from the server
 std::pair<float, float> getWeightFromServer(const char* authToken, int resourceId) {
   HTTPClient http;
-  http.begin(serverTest + String(resourceId));
+  http.begin(serverGet + String(resourceId));
   http.addHeader("Content-Type", "application/json");
   String authHeader = "Bearer " + String(authToken);
   http.addHeader("Authorization", authHeader);
@@ -101,13 +87,13 @@ std::pair<float, float> getWeightFromServer(const char* authToken, int resourceI
 // Function to update total weight data on the server
 void updateTotalWeight(const char* authToken, float totalWeight, int resourceId) {
   HTTPClient http;
-  http.begin(serverTest + String(resourceId));
+  http.begin(serverUpdate + String(resourceId));
   http.addHeader("Content-Type", "application/json");
   String authHeader = "Bearer " + String(authToken);
   http.addHeader("Authorization", authHeader);
 
   // Prepare request body with total weight information
-  String requestBody = "{\"maxWeight\": 280.0, \"actualWeight\": " + String(totalWeight) + "}";
+  String requestBody = "{\"weight\": " + String(totalWeight) + "}";
   int httpResponseCode = http.PUT(requestBody);
 
   if (httpResponseCode == 200) {
